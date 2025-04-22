@@ -227,12 +227,13 @@ section {
     padding: 30px;
     width: 300px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: transform 0.3s, box-shadow 0.3s;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    transform: scale(1);
 }
 
 .feature-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1); /* zoom in/pop out */
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); /* stronger shadow */
 }
 
 .feature-icon {
@@ -251,14 +252,6 @@ section {
     opacity: 0.8;
     line-height: 1.6;
 }
-
-/* body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background: linear-gradient(135deg, #0b0b6b 0%, #1e54b7 100%);
-    color: white;
-    } */
 
 .container {
     max-width: 1200px;
@@ -943,13 +936,51 @@ section {
     width: 100%;
 }
 
+@keyframes slideInFromRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideInFromLeft {
+    from {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
 .key-feature {
     display: flex;
     align-items: center;
     max-width: 900px;
     margin: 0 auto 60px auto;
     gap: 40px;
+    opacity: 0; /* Start invisible */
 }
+
+.slide-in-right {
+    animation: slideInFromRight 1s ease forwards;
+  }
+  
+  .slide-in-left {
+    animation: slideInFromLeft 1s ease forwards;
+  }
+  
+  /* Add responsive behavior for the animations */
+  @media (max-width: 992px) {
+    .slide-in-right, .slide-in-left {
+      animation: zoomInScroll 0.6s ease-out forwards;
+    }
+  }
 
 .key-feature:last-child {
     margin-bottom: 0;

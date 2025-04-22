@@ -330,6 +330,41 @@
     );
   }
 
+
+  const keyFeatures = document.querySelectorAll('.key-feature');
+  
+  // Function to handle scroll events
+  function handleKeyFeatureScroll() {
+    // Check for mobile view
+    const isMobile = window.innerWidth <= 992;
+    
+    keyFeatures.forEach((feature, index) => {
+      if (isInViewport(feature)) {
+        // On mobile, just use zoom animation
+        if (isMobile) {
+          feature.classList.add('zoom-in-animation');
+        } else {
+          // On desktop, alternate slide animations
+          if (index % 2 === 0) {
+            feature.classList.add('slide-in-right');
+          } else {
+            feature.classList.add('slide-in-left');
+          }
+        }
+      }
+    });
+  }
+  
+  // Initial check when page loads
+  handleKeyFeatureScroll();
+  
+  // Add scroll event listener
+  window.addEventListener('scroll', handleKeyFeatureScroll);
+  
+  // Also check on window resize
+  window.addEventListener('resize', handleKeyFeatureScroll);
+
+  
   // Get all process elements and arrows
   const processes = document.querySelectorAll('.process');
   const arrows = document.querySelectorAll('.arrow');
