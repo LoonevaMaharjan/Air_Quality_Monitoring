@@ -1,0 +1,53 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(to right, #002f6c, #00509e);
+    color: white;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .navbar {
+    display: flex;
+    gap: 2rem;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 1rem;
+    justify-content: center;
+  }
+  
+  .navbar a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .navbar a.active {
+    border-bottom: 2px solid cyan;
+  }
+  
+  h1 {
+    text-align: center;
+    margin-top: 2rem;
+  }
+  
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+  }
+  
+  canvas {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1rem;
+  }
+  
+  .card {
+    background: rgba(255, 255, 255, 0.1);
+    margin: 2rem auto;
+    padding: 2rem;
+    max-width: 500px;
+    border-radius: 16px;
+    text-align: center;
+  }
+  
