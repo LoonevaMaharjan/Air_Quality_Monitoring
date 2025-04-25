@@ -5,6 +5,7 @@
   <title>Dashboard</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
   <link rel="stylesheet" href="Dashboard.css">
+
 </head>
 <body>
   <!-- Background Animation Elements -->
@@ -55,6 +56,27 @@
     </div>
   </div>
 
+  <!-- Historical AQI Data Table -->
+   <div class="history-section">
+    <h2 style="margin-top: 40px;">📊 Historical AQI Data</h2>
+    <table id="history-table" class="history-table">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>PM2.5</th>
+          <th>CO2 (ppm)</th>
+          <th>Temperature (°C)</th>
+          <th>Humidity (%)</th>
+          <th>AQI Status</th>
+        </tr>
+      </thead>
+  <tbody id="historyTableBody">
+    <tr><td colspan="6">Loading...</td></tr>
+  </tbody>
+</table>
+</div>
+
+
   <script>
     // Create pulse effects
     function createPulses() {
@@ -84,7 +106,7 @@
       }
     }
 
-    // Fetch AQI data
+    // Fetch current AQI data
     async function fetchData(blobId) {
       try {
         const res = await fetch(`https://aggregator.testnet.walrus.atalma.io/v1/blobs/${blobId}`);
@@ -119,10 +141,99 @@
           }, 2000);
         });
 
+        // Return the data for possible further use
+        return data;
+
       } catch (error) {
         console.error("Error fetching data: ", error);
+        
+        // Show some placeholder data in case of error
+        document.getElementById('pm25Value').textContent = "--";
+        document.getElementById('co2Value').textContent = "--";
+        document.getElementById('tempValue').textContent = "--";
+        document.getElementById('humidityValue').textContent = "--";
+        document.getElementById('aqiValue').textContent = "--";
+        
+        return null;
       }
     }
+
+    // Generate random data for a blob ID
+    function generateRandomData(blobId, daysAgo) {
+      // Create timestamp
+      const timestamp = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
+      
+      // Generate random values
+      const pm25 = (Math.random() * 30 + 10).toFixed(1);
+      const co2 = Math.floor(Math.random() * 200 + 400);
+      const temperature = (Math.random() * 10 + 20).toFixed(1);
+      const humidity = Math.floor(Math.random() * 30 + 30);
+      
+      // Determine AQI status based on PM2.5
+      let aqiStatus;
+      if (pm25 < 15) {
+        aqiStatus = "Good";
+      } else if (pm25 < 30) {
+        aqiStatus = "Moderate";
+      } else {
+        aqiStatus = "Poor";
+      }
+      
+      return {
+        blobId: blobId,
+        timestamp: timestamp,
+        pm25: pm25,
+        co2_ppm: co2,
+        temperature: temperature,
+        humidity: humidity,
+        aqi_status: aqiStatus
+      };
+    }
+
+    // Fetch data for a single blob ID or generate fallback
+    async function loadHistoricalData() {
+    const historyTableBody = document.getElementById('historyTableBody');
+    historyTableBody.innerHTML = '';
+
+    const blobIds = [
+      "0mOIQG6GS38jDtyH5aGePw39lesp9dyBebpf3f-RJnA",
+      "0mOIQG6GS38jDtyH5aGePw39lesp9dyBebpf3f-RJnA",
+      "0mOIQG6GS38jDtyH5aGePw39lesp9dyBebpf3f-RJnA",
+      "0mOIQG6GS38jDtyH5aGePw39lesp9dyBebpf3f-RJnA"
+      // Add more if needed
+    ];
+
+    const formatTimestamp = (ts) => {
+      const date = new Date(ts);
+      return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
+    for (const id of blobIds) {
+      try {
+        const res = await fetch(`https://aggregator.testnet.walrus.atalma.io/v1/blobs/${id}`);
+        if (!res.ok) throw new Error('Fetch failed');
+        const data = await res.json();
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${formatTimestamp(data.timestamp || Date.now())}</td>
+          <td>${data.pm25 ?? '--'}</td>
+          <td>${data.co2_ppm ?? '--'}</td>
+          <td>${data.temperature ?? '--'}</td>
+          <td>${data.humidity ?? '--'}</td>
+          <td>${data.aqi_status ?? '--'}</td>
+        `;
+        historyTableBody.appendChild(row);
+      } catch (err) {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td colspan="6">Error loading blob: ${id}</td>`;
+        historyTableBody.appendChild(row);
+      }
+    }
+  }
+
+  // Call the function when page loads
+  document.addEventListener('DOMContentLoaded', loadHistoricalData);
 
     document.addEventListener("DOMContentLoaded", function() {
       // Function to check if an element is in viewport
@@ -198,90 +309,93 @@
       }
 
       // Connect Sui wallet button functionality
-const connectWalletBtn = document.getElementById('connectWalletBtn');
+      const connectWalletBtn = document.getElementById('connectWalletBtn');
 
-// Function to check if wallet is installed
-function isSuiWalletInstalled() {
-  return Boolean(window.suiWallet || window.sui);
-}
+      // Function to check if wallet is installed
+      function isSuiWalletInstalled() {
+        return Boolean(window.suiWallet || window.sui);
+      }
 
-// Function to get the wallet provider
-function getWalletProvider() {
-  if (window.suiWallet) return window.suiWallet;
-  if (window.sui) return window.sui;
-  return null;
-}
+      // Function to get the wallet provider
+      function getWalletProvider() {
+        if (window.suiWallet) return window.suiWallet;
+        if (window.sui) return window.sui;
+        return null;
+      }
 
-// Wait for the wallet to be available
-document.addEventListener('DOMContentLoaded', () => {
-  // Check if the wallet is already injected
-  if (isSuiWalletInstalled()) {
-    console.log("Sui wallet detected on page load");
-  } else {
-    console.log("Waiting for Sui wallet to be injected...");
-    
-    // Set up a listener for wallet injection
-    window.addEventListener('load', () => {
-      // Check again after window load
-      setTimeout(() => {
+      // Wait for the wallet to be available
+      document.addEventListener('DOMContentLoaded', () => {
+        // Check if the wallet is already injected
         if (isSuiWalletInstalled()) {
-          console.log("Sui wallet detected after timeout");
+          console.log("Sui wallet detected on page load");
         } else {
-          console.log("Sui wallet not detected after timeout");
+          console.log("Waiting for Sui wallet to be injected...");
+          
+          // Set up a listener for wallet injection
+          window.addEventListener('load', () => {
+            // Check again after window load
+            setTimeout(() => {
+              if (isSuiWalletInstalled()) {
+                console.log("Sui wallet detected after timeout");
+              } else {
+                console.log("Sui wallet not detected after timeout");
+              }
+            }, 1000); // Give it a second after load
+          });
         }
-      }, 1000); // Give it a second after load
-    });
-  }
-});
+      });
 
-connectWalletBtn.addEventListener('click', async function() {
-  try {
-    // Check if wallet is installed
-    if (!isSuiWalletInstalled()) {
-      alert("Sui Wallet not detected. Please install the Sui Wallet extension.");
-      return;
-    }
+      connectWalletBtn.addEventListener('click', async function() {
+        try {
+          // Check if wallet is installed
+          if (!isSuiWalletInstalled()) {
+            alert("Sui Wallet not detected. Please install the Sui Wallet extension.");
+            return;
+          }
 
-    connectWalletBtn.textContent = "Connecting...";
-    
-    const walletProvider = getWalletProvider();
-    let account;
-    
-    if (walletProvider === window.suiWallet) {
-      // Standard Sui wallet
-      await walletProvider.requestPermissions();
-      const accounts = await walletProvider.getAccounts();
+          connectWalletBtn.textContent = "Connecting...";
+          
+          const walletProvider = getWalletProvider();
+          let account;
+          
+          if (walletProvider === window.suiWallet) {
+            // Standard Sui wallet
+            await walletProvider.requestPermissions();
+            const accounts = await walletProvider.getAccounts();
+            
+            if (accounts && accounts.length > 0) {
+              account = accounts[0];
+            } else {
+              throw new Error("No accounts found");
+            }
+          } else if (walletProvider === window.sui) {
+            // Alternative Sui wallet
+            const response = await walletProvider.connect();
+            if (response.status === "success") {
+              account = response.account;
+            } else {
+              throw new Error("Failed to connect");
+            }
+          }
+          
+          if (account) {
+            const shortAddress = account.substring(0, 6) + '...' + account.substring(account.length - 4);
+            connectWalletBtn.textContent = shortAddress;
+            console.log("Connected to Sui wallet:", account);
+          }
+        } catch (error) {
+          console.error("Error connecting wallet:", error);
+          connectWalletBtn.textContent = "Connect to Wallet";
+          alert("Failed to connect wallet: " + error.message);
+        }
+      });
+
+      // Fetch the current AQI data
+      const currentBlobId = "0mOIQG6GS38jDtyH5aGePw39lesp9dyBebpf3f-RJnA";
+      fetchData(currentBlobId);
       
-      if (accounts && accounts.length > 0) {
-        account = accounts[0];
-      } else {
-        throw new Error("No accounts found");
-      }
-    } else if (walletProvider === window.sui) {
-      // Alternative Sui wallet
-      const response = await walletProvider.connect();
-      if (response.status === "success") {
-        account = response.account;
-      } else {
-        throw new Error("Failed to connect");
-      }
-    }
-    
-    if (account) {
-      const shortAddress = account.substring(0, 6) + '...' + account.substring(account.length - 4);
-      connectWalletBtn.textContent = shortAddress;
-      console.log("Connected to Sui wallet:", account);
-    }
-  } catch (error) {
-    console.error("Error connecting wallet:", error);
-    connectWalletBtn.textContent = "Connect to Wallet";
-    alert("Failed to connect wallet: " + error.message);
-  }
-});
-
-      // Fetch the AQI data
-      const blobId = "0mOIQG6GS38jDtyH5aGePw39lesp9dyBebpf3f-RJnA";
-      fetchData(blobId);
+      // Fetch historical data from multiple blob IDs
+      fetchHistoricalData();
     });
   </script>
 </body>

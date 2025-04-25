@@ -330,3 +330,73 @@ h1 {
     justify-content: center;
   }
 }
+
+
+/* Additional styles for the history table */
+.history-section {
+  margin-top: 40px;
+  padding: 20px;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+}
+
+.history-table th, .history-table td {
+  padding: 12px 15px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.history-table th {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  font-weight: bold;
+}
+
+.history-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.history-table .timestamp {
+  font-size: 0.9em;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.history-table .blob-id {
+  font-size: 0.8em;
+  color: rgba(255, 255, 255, 0.6);
+  word-break: break-all;
+}
+
+.table-container {
+  margin-top: 20px;
+  overflow-x: auto;
+}
+
+h2 {
+  text-align: center;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 10px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
