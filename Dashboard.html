@@ -198,52 +198,86 @@
       }
 
       // Connect Sui wallet button functionality
-      const connectWalletBtn = document.getElementById('connectWalletBtn');
-      
-      connectWalletBtn.addEventListener('click', async function() {
-        try {
-          // Check if Sui wallet provider exists
-          if (window.suiWallet) {
-            connectWalletBtn.textContent = "Connecting...";
-            
-            // Request account access from Sui wallet
-            const response = await window.suiWallet.requestPermissions();
-            const accounts = await window.suiWallet.getAccounts();
-            
-            if (accounts && accounts.length > 0) {
-              // Update button text with shortened account address
-              const account = accounts[0];
-              const shortAddress = account.substring(0, 6) + '...' + account.substring(account.length - 4);
-              connectWalletBtn.textContent = shortAddress;
-              
-              console.log("Connected to Sui wallet:", account);
-            } else {
-              throw new Error("No accounts found");
-            }
-          } else if (window.sui) {
-            // Alternative check for Sui wallet
-            connectWalletBtn.textContent = "Connecting...";
-            
-            const response = await window.sui.connect();
-            if (response.status === "success") {
-              const account = response.account;
-              const shortAddress = account.substring(0, 6) + '...' + account.substring(account.length - 4);
-              connectWalletBtn.textContent = shortAddress;
-              
-              console.log("Connected to Sui wallet:", account);
-            } else {
-              throw new Error("Failed to connect");
-            }
-          } else {
-            alert("Sui Wallet not detected. Please install Sui Wallet extension.");
-            console.log("No Sui Wallet detected");
-          }
-        } catch (error) {
-          console.error("Error connecting wallet:", error);
-          connectWalletBtn.textContent = "Connect to Wallet";
-          alert("Failed to connect wallet: " + error.message);
+const connectWalletBtn = document.getElementById('connectWalletBtn');
+
+// Function to check if wallet is installed
+function isSuiWalletInstalled() {
+  return Boolean(window.suiWallet || window.sui);
+}
+
+// Function to get the wallet provider
+function getWalletProvider() {
+  if (window.suiWallet) return window.suiWallet;
+  if (window.sui) return window.sui;
+  return null;
+}
+
+// Wait for the wallet to be available
+document.addEventListener('DOMContentLoaded', () => {
+  // Check if the wallet is already injected
+  if (isSuiWalletInstalled()) {
+    console.log("Sui wallet detected on page load");
+  } else {
+    console.log("Waiting for Sui wallet to be injected...");
+    
+    // Set up a listener for wallet injection
+    window.addEventListener('load', () => {
+      // Check again after window load
+      setTimeout(() => {
+        if (isSuiWalletInstalled()) {
+          console.log("Sui wallet detected after timeout");
+        } else {
+          console.log("Sui wallet not detected after timeout");
         }
-      });
+      }, 1000); // Give it a second after load
+    });
+  }
+});
+
+connectWalletBtn.addEventListener('click', async function() {
+  try {
+    // Check if wallet is installed
+    if (!isSuiWalletInstalled()) {
+      alert("Sui Wallet not detected. Please install the Sui Wallet extension.");
+      return;
+    }
+
+    connectWalletBtn.textContent = "Connecting...";
+    
+    const walletProvider = getWalletProvider();
+    let account;
+    
+    if (walletProvider === window.suiWallet) {
+      // Standard Sui wallet
+      await walletProvider.requestPermissions();
+      const accounts = await walletProvider.getAccounts();
+      
+      if (accounts && accounts.length > 0) {
+        account = accounts[0];
+      } else {
+        throw new Error("No accounts found");
+      }
+    } else if (walletProvider === window.sui) {
+      // Alternative Sui wallet
+      const response = await walletProvider.connect();
+      if (response.status === "success") {
+        account = response.account;
+      } else {
+        throw new Error("Failed to connect");
+      }
+    }
+    
+    if (account) {
+      const shortAddress = account.substring(0, 6) + '...' + account.substring(account.length - 4);
+      connectWalletBtn.textContent = shortAddress;
+      console.log("Connected to Sui wallet:", account);
+    }
+  } catch (error) {
+    console.error("Error connecting wallet:", error);
+    connectWalletBtn.textContent = "Connect to Wallet";
+    alert("Failed to connect wallet: " + error.message);
+  }
+});
 
       // Fetch the AQI data
       const blobId = "0mOIQG6GS38jDtyH5aGePw39lesp9dyBebpf3f-RJnA";
