@@ -27,7 +27,7 @@
     </div>
   </div>
 
-  <h1>AQI Dashboard</h1>
+  <h1>Todays AQI</h1>
 
   <div class="grid">
     <div class="chart-card">
@@ -62,7 +62,6 @@
     <table id="history-table" class="history-table">
       <thead>
         <tr>
-          <th>Timestamp</th>
           <th>PM2.5</th>
           <th>CO2 (ppm)</th>
           <th>Temperature (°C)</th>
@@ -71,7 +70,7 @@
         </tr>
       </thead>
   <tbody id="historyTableBody">
-    <tr><td colspan="6">Loading...</td></tr>
+    <tr><td colspan="5">Loading...</td></tr>
   </tbody>
 </table>
 </div>
@@ -197,16 +196,11 @@
 
     const blobIds = [
       "0mOIQG6GS38jDtyH5aGePw39lesp9dyBebpf3f-RJnA",
-      "0mOIQG6GS38jDtyH5aGePw39lesp9dyBebpf3f-RJnA",
-      "0mOIQG6GS38jDtyH5aGePw39lesp9dyBebpf3f-RJnA",
-      "0mOIQG6GS38jDtyH5aGePw39lesp9dyBebpf3f-RJnA"
+      "ETeNGlT0go_O2zZQaMALdcbFeNs0B1Inf9K9iO24EdE",
+      "oY9XdCbhaNoPAEC0XHV_UUQBO3k3BjB4_fdalwwRNE4",
+      "Xd6PU5Fbl4tpV5OoM2imnzINcikEtnj0mxc2JDrR28I"
       // Add more if needed
     ];
-
-    const formatTimestamp = (ts) => {
-      const date = new Date(ts);
-      return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    };
 
     for (const id of blobIds) {
       try {
@@ -216,7 +210,6 @@
 
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${formatTimestamp(data.timestamp || Date.now())}</td>
           <td>${data.pm25 ?? '--'}</td>
           <td>${data.co2_ppm ?? '--'}</td>
           <td>${data.temperature ?? '--'}</td>
@@ -226,7 +219,7 @@
         historyTableBody.appendChild(row);
       } catch (err) {
         const row = document.createElement('tr');
-        row.innerHTML = `<td colspan="6">Error loading blob: ${id}</td>`;
+        row.innerHTML = `<td colspan="5">Error loading blob: ${id}</td>`;
         historyTableBody.appendChild(row);
       }
     }
